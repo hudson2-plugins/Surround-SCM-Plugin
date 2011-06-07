@@ -2,15 +2,15 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
-    <artifactId>plugin</artifactId>
-    <version>1.377</version><!-- which version of Hudson is this plugin built against? -->
-    <relativePath>../pom.xml</relativePath>
+    <artifactId>hudson-plugin-parent</artifactId>
+    <version>1.398</version><!-- which version of Hudson is this plugin built against? -->
   </parent>
 
-  <groupId>SeapineSoftware</groupId>
-  <artifactId>SurroundSCMPlugin</artifactId>
+  <artifactId>Surround-SCM-Plugin</artifactId>
+  <name>Seapine Surround SCM - Hudson Plugin
   <version>1.0</version>
   <packaging>hpi</packaging>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/Surround+SCM+Plugin</url>
 
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
   <repositories>
@@ -28,11 +28,23 @@
   </pluginRepositories>
 
   <scm>    
-    <connection>scm:git:ssh://github.com/jenkinsci/MYPLLUGINNAME.git</connection>
+    <connection>scm:git:ssh://github.com/hudson-plugins/Surround-SCM-Plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/hudson-plugins/Surround-SCM-Plugin.git</developerConnection>
     <url>https://github.com/hudson-plugins/Surround-SCM-Plugin</url>  
   </scm>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>${sonatypeOssDistMgmtSnapshotsUrl}</url>
+    </snapshotRepository>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Release Repository</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <developers>
     <developer>
