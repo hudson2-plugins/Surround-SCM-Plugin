@@ -7,8 +7,8 @@
   </parent>
 
   <artifactId>Surround-SCM-Plugin</artifactId>
-  <name>Seapine Surround SCM - Hudson Plugin
-  <version>1.0</version>
+  <name>Seapine Surround SCM - Hudson Plugin</name>
+  <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Surround+SCM+Plugin</url>
 
