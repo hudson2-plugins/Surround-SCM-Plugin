@@ -1,4 +1,4 @@
-package hudson.plugins.SeapineSoftware;
+package hudson.scm;
 
 import hudson.scm.SCMRevisionState;
 

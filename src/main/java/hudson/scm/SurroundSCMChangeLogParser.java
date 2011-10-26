@@ -1,4 +1,4 @@
-package hudson.plugins.SeapineSoftware;
+package hudson.scm;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +19,8 @@ import hudson.model.User;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.scm.SurroundSCMChangeLogSet;
+import hudson.scm.SurroundSCMChangeLogSet.SurroundSCMChangeLogSetEntry;
 import hudson.scm.EditType;
 
 public class SurroundSCMChangeLogParser extends ChangeLogParser {
