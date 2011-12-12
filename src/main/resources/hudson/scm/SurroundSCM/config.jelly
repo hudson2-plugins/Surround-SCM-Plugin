@@ -22,7 +22,7 @@
       <f:textbox name="SurroundSCM.userName" value="${scm.userName}" />
     </f:entry>
     <f:entry title="Password">
-      <f:textbox name="SurroundSCM.password" value="${scm.password}" />
+      <f:password name="SurroundSCM.password" value="${scm.password}" />
     </f:entry>
    <f:entry title="Branch">
       <f:textbox name="SurroundSCM.branch" value="${scm.branch}" />
