@@ -28,9 +28,9 @@
   </pluginRepositories>
 
   <scm>    
-    <connection>scm:git:ssh://github.com/hudson-plugins/Surround-SCM-Plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/hudson-plugins/Surround-SCM-Plugin.git</developerConnection>
-    <url>https://github.com/hudson-plugins/Surround-SCM-Plugin</url>  
+    <connection>scm:git:ssh://github.com/hudson2-plugins/Surround-SCM-Plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/hudson2-plugins/Surround-SCM-Plugin.git</developerConnection>
+    <url>https://github.com/hudson2-plugins/Surround-SCM-Plugin</url>  
   </scm>
 
   <distributionManagement>
