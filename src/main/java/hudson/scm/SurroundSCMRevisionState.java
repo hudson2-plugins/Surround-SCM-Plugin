@@ -7,40 +7,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SurroundSCMRevisionState extends SCMRevisionState {
+public final class SurroundSCMRevisionState extends SCMRevisionState {
 
-	public Map<String, Long> revisions;
+  private final Date  buildDate;
+  private final int   buildNumber;
+  
+	public SurroundSCMRevisionState(Date buildDate, int buildNumber) {
 
-	public SurroundSCMRevisionState(Map<String, Long> revisions) {
-
-		this.revisions = revisions;
-	}
-
-	public SurroundSCMRevisionState() {
-
-		revisions = new HashMap<String, Long>();
-		buildDate = new Date();
-	}
-	
-	public void AddRevision(String key, long value){
-		if (revisions == null)
-			revisions = new HashMap<String, Long>();
-		revisions.put(key, value);
-	}
-
-	public void setRevisions(Map<String, Long> revisions) {
-		this.revisions = revisions;
-	}
-	
-	public void setDate(Date date) {
-		buildDate = date;
+		this.buildDate = new Date(buildDate.getTime());
+    this.buildNumber = buildNumber;
 	}
 	
 	public Date getDate() {
-		return buildDate;
+		return new Date(buildDate.getTime());
 	}
-	
-	
-	public Date buildDate;
-
+  
+  public int getBuildNumber() {
+    return buildNumber;
+  }
 }
