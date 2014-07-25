@@ -12,6 +12,9 @@
     <f:entry title="CLI (sscm) ">
       <f:textbox name="SurroundSCM.surroundSCMExecutable" value="${scm.surroundSCMExecutable}" />
     </f:entry>
+    <f:entry title="RSA key path">
+      <f:textbox name="SurroundSCM.rsaKeyPath" value="${scm.rsaKeyPath}" />
+    </f:entry>
     <f:entry title="Server name">
       <f:textbox name="SurroundSCM.server" value="${scm.server}" />
     </f:entry>
