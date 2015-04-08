@@ -218,8 +218,12 @@ public final class SurroundSCM extends SCM {
     
     Date now = new Date();
     File temporaryFile = File.createTempFile("changes", "txt");
+    temporaryFile.deleteOnExit();
+	
     listener.getLogger().println("Calculating changes since build #" + lastBuildNum + " which happened at " + scm_datetime_formatter.format(lastBuild) + " pluginVer: " + pluginVersion);
     
+    temporaryFile.delete();
+	
     double countChanges = determineChangeCount(launcher, workspace, listener, lastBuild,now,temporaryFile);
         
     if (countChanges == 0)
