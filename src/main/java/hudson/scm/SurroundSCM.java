@@ -30,9 +30,9 @@ public final class SurroundSCM extends SCM {
   /*---------------------INNER CLASS------------------------------------------------------------*/
 
   public static class SurroundSCMDescriptor extends
-      SCMDescriptor<SurroundSCM> {
+        SCMDescriptor<SurroundSCM> {
 
-    
+
     /**
      * Constructs a new SurroundSCMDescriptor.
      */
@@ -51,10 +51,10 @@ public final class SurroundSCM extends SCM {
 
     @Override
     public SCM newInstance(StaplerRequest req, JSONObject formData)
-        throws FormException {
+          throws FormException {
       SurroundSCM scm = req.bindJSON(SurroundSCM.class, formData);
       return scm;
-    }    
+    }
 
   }
 
@@ -64,18 +64,18 @@ public final class SurroundSCM extends SCM {
   // significant
   final int changesThreshold = 5;
   final int pluginVersion = 8;
-  
+
   // config options
   private String rsaKeyPath;
-  private String server;  
+  private String server;
   private String serverPort;
   private String userName ;
   private String password ;
   private String branch ;
   private String repository;
   private String surroundSCMExecutable;
-  
-  
+
+
   //getters and setters
   public String getRsaKeyPath() {
     return rsaKeyPath;
@@ -84,7 +84,7 @@ public final class SurroundSCM extends SCM {
   public void setRsaKeyPath(String rsaKeyPath) {
     this.rsaKeyPath = rsaKeyPath;
   }
-  
+
   public String getServer() {
     return server;
   }
@@ -132,7 +132,7 @@ public final class SurroundSCM extends SCM {
   public void setRepository(String repository) {
     this.repository = repository;
   }
-  
+
   public String getSurroundSCMExecutable() {
     if (surroundSCMExecutable == null)
       return "sscm";
@@ -144,19 +144,19 @@ public final class SurroundSCM extends SCM {
     this.surroundSCMExecutable = surroundSCMExecutable;
   }
 
-  
+
   /**
    * Singleton descriptor.
    */
   @Extension
   public static final SurroundSCMDescriptor DESCRIPTOR = new SurroundSCMDescriptor();
-  
+
   public static final String SURROUND_DATETIME_FORMAT_STR = "yyyyMMddHHmmss";
   public static final String SURROUND_DATETIME_FORMAT_STR_2 = "yyyyMMddHH:mm:ss";
 
   @DataBoundConstructor
   public SurroundSCM(String rsaKeyPath, String server, String serverPort, String userName,
-      String password, String branch, String repository, String surroundSCMExecutable) {
+                     String password, String branch, String repository, String surroundSCMExecutable) {
     this.rsaKeyPath = rsaKeyPath;
     this.server = server;
     this.serverPort = serverPort;
@@ -170,11 +170,11 @@ public final class SurroundSCM extends SCM {
   public SurroundSCM() {
 
   }
-  
-    @Override
-    public SCMDescriptor<?> getDescriptor() {
-        return DESCRIPTOR;
-    }
+
+  @Override
+  public SCMDescriptor<?> getDescriptor() {
+    return DESCRIPTOR;
+  }
 
 
   /*
@@ -189,17 +189,17 @@ public final class SurroundSCM extends SCM {
      */
   @Override
   public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
-      Launcher launcher, TaskListener listener) throws IOException,
-      InterruptedException {
+                                                 Launcher launcher, TaskListener listener) throws IOException,
+        InterruptedException {
 
     SimpleDateFormat scm_datetime_formatter = new SimpleDateFormat(SURROUND_DATETIME_FORMAT_STR);
-    
+
     // this is what we'll return  
     final Date  lastBuildDate = build.getTime();
     final int   lastBuildNum  = build.getNumber();
     SurroundSCMRevisionState scmRevisionState = new SurroundSCMRevisionState(lastBuildDate, lastBuildNum);
     listener.getLogger().println("calcRevisionsFromBuild determined revision for build #" + scmRevisionState.getBuildNumber() + " built originally at " + scm_datetime_formatter.format(scmRevisionState.getDate()) + " pluginVer: " + pluginVersion);
-    
+
     return scmRevisionState;
   }
 
@@ -207,30 +207,33 @@ public final class SurroundSCM extends SCM {
   /* 
    */
   protected PollingResult compareRemoteRevisionWith(
-      AbstractProject<?, ?> project, Launcher launcher,
-      FilePath workspace, TaskListener listener, SCMRevisionState baseline)
-      throws IOException, InterruptedException {
-    
+        AbstractProject<?, ?> project, Launcher launcher,
+        FilePath workspace, TaskListener listener, SCMRevisionState baseline)
+        throws IOException, InterruptedException {
+
     SimpleDateFormat scm_datetime_formatter = new SimpleDateFormat(SURROUND_DATETIME_FORMAT_STR);
-    
+
     Date  lastBuild = ((SurroundSCMRevisionState)baseline).getDate();
     int   lastBuildNum = ((SurroundSCMRevisionState)baseline).getBuildNumber();
-    
+
     Date now = new Date();
     File temporaryFile = File.createTempFile("changes", "txt");
-    temporaryFile.deleteOnExit();
-	
+
     listener.getLogger().println("Calculating changes since build #" + lastBuildNum + " which happened at " + scm_datetime_formatter.format(lastBuild) + " pluginVer: " + pluginVersion);
-    
-    temporaryFile.delete();
-	
+
     double countChanges = determineChangeCount(launcher, workspace, listener, lastBuild,now,temporaryFile);
-        
+
+    if(!temporaryFile.delete())
+    {
+      listener.getLogger().println("Failed to delete temporary file [" + temporaryFile.getAbsolutePath() + "] marking the file to be deleted when Jenkins restarts.");
+      temporaryFile.deleteOnExit();
+    }
+
     if (countChanges == 0)
       return PollingResult.NO_CHANGES;
     else if (countChanges < changesThreshold)
       return PollingResult.SIGNIFICANT;
-      
+
     return PollingResult.BUILD_NOW;
   }
 
@@ -238,18 +241,18 @@ public final class SurroundSCM extends SCM {
   // of the specified machine. We'll use sscm get
   @Override
   public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher,
-      FilePath workspace, BuildListener listener, File changelogFile)
-      throws IOException, InterruptedException {
-      
+                          FilePath workspace, BuildListener listener, File changelogFile)
+        throws IOException, InterruptedException {
+
     boolean returnValue = true;
-    
+
     SimpleDateFormat scm_datetime_formatter = new SimpleDateFormat(SURROUND_DATETIME_FORMAT_STR_2);
-    
+
     if (server != null )
       listener.getLogger().println("server: "+server);
-    
+
     Date currentDate = new Date(); //defaults to current
-    
+
     ArgumentListBuilder cmd = new ArgumentListBuilder();
     cmd.add(getSurroundSCMExecutable());//will default to sscm user can put in path
     cmd.add("get");
@@ -269,7 +272,7 @@ public final class SurroundSCM extends SCM {
     cmd.add("-s" + scm_datetime_formatter.format(currentDate));
 
     int cmdResult = launcher.launch().cmds(cmd).envs(new String[0])
-        .stdin(null).stdout(listener.getLogger()).pwd(workspace).join();
+          .stdin(null).stdout(listener.getLogger()).pwd(workspace).join();
     if (cmdResult == 0)
     {
       final Run<?, ?> lastBuild = build.getPreviousBuild();
@@ -278,40 +281,40 @@ public final class SurroundSCM extends SCM {
       if (lastBuild == null) {
         lastBuildDate = new Date();
         lastBuildDate.setTime(0); // default to January 1, 1970
-        listener.getLogger().print("Never been built.");        
+        listener.getLogger().print("Never been built.");
       } else
         lastBuildDate = lastBuild.getTimestamp().getTime();
-      
+
       // Setup the revision state based on what we KNOW to be correct information.
       SurroundSCMRevisionState scmRevisionState = new SurroundSCMRevisionState(currentDate, build.getNumber());
       build.addAction(scmRevisionState);
       listener.getLogger().println("Checkout calculated ScmRevisionState for build #" + build.getNumber() + " to be the datetime " + scm_datetime_formatter.format(currentDate) + " pluginVer: " + pluginVersion);
-      
+
       returnValue = captureChangeLog(launcher, workspace,listener, lastBuildDate, currentDate, changelogFile);
     }
     else
       returnValue = false;
-      
-    listener.getLogger().println("Checkout completed.");  
+
+    listener.getLogger().println("Checkout completed.");
     return returnValue;
   }
 
   @Override
-  public ChangeLogParser createChangeLogParser() {    
+  public ChangeLogParser createChangeLogParser() {
     return new SurroundSCMChangeLogParser();
   }
 
   private boolean captureChangeLog(Launcher launcher, FilePath workspace,
-      BuildListener listener, Date lastBuildDate, Date currentDate, File changelogFile) throws IOException, InterruptedException {
-    
+                                   BuildListener listener, Date lastBuildDate, Date currentDate, File changelogFile) throws IOException, InterruptedException {
+
     boolean result = true;
-    
+
     SimpleDateFormat scm_datetime_formatter = new SimpleDateFormat(SURROUND_DATETIME_FORMAT_STR);
-   
+
     String dateRange = scm_datetime_formatter.format(lastBuildDate);
     dateRange = dateRange.concat(":");
-    dateRange = dateRange.concat(scm_datetime_formatter.format(currentDate));    
-    
+    dateRange = dateRange.concat(scm_datetime_formatter.format(currentDate));
+
     ArgumentListBuilder cmd = new ArgumentListBuilder();
     cmd.add(getSurroundSCMExecutable());//will default to sscm user can put in path
     cmd.add("cc");
@@ -325,51 +328,51 @@ public final class SurroundSCM extends SCM {
       cmd.add("-z".concat(server).concat(":").concat(serverPort));
     }
     cmd.add("-b".concat(branch));
-    cmd.add("-p".concat(repository));    
-    cmd.add("-r");    
-    
+    cmd.add("-p".concat(repository));
+    cmd.add("-r");
+
     FileOutputStream os = new FileOutputStream(changelogFile);
     try {
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            PrintWriter writer = new PrintWriter(new FileWriter(changelogFile));
-            try {              
-              
-              
-              int cmdResult = launcher.launch().cmds(cmd).envs(new String[0]).stdin(null).stdout(bos).pwd(workspace).join();
-              if (cmdResult != 0)
-              {
-                listener.fatalError("Changelog failed with exit code " + cmdResult);
-                result = false;
-              }
-              
-              
-            } finally {
-              writer.close();
-                bos.close();
-            }
-        } finally {
-            os.close();
+      BufferedOutputStream bos = new BufferedOutputStream(os);
+      PrintWriter writer = new PrintWriter(new FileWriter(changelogFile));
+      try {
+
+
+        int cmdResult = launcher.launch().cmds(cmd).envs(new String[0]).stdin(null).stdout(bos).pwd(workspace).join();
+        if (cmdResult != 0)
+        {
+          listener.fatalError("Changelog failed with exit code " + cmdResult);
+          result = false;
         }
 
-        listener.getLogger().println("Changelog calculated successfully.");
-        listener.getLogger().println("Change log file: " + changelogFile.getAbsolutePath() );
-        
-        return result;
+
+      } finally {
+        writer.close();
+        bos.close();
+      }
+    } finally {
+      os.close();
+    }
+
+    listener.getLogger().println("Changelog calculated successfully.");
+    listener.getLogger().println("Change log file: " + changelogFile.getAbsolutePath() );
+
+    return result;
   }
-  
+
   private double determineChangeCount(Launcher launcher, FilePath workspace,
-      TaskListener listener, Date lastBuildDate, Date currentDate, File changelogFile) throws IOException, InterruptedException {
-    
+                                      TaskListener listener, Date lastBuildDate, Date currentDate, File changelogFile) throws IOException, InterruptedException {
+
     SimpleDateFormat scm_datetime_formatter = new SimpleDateFormat(SURROUND_DATETIME_FORMAT_STR);
-    
+
     double changesCount = 0;
-     if (server != null )
-       listener.getLogger().println("in determine Change Count server: "+server);
-    
+    if (server != null )
+      listener.getLogger().println("in determine Change Count server: "+server);
+
     String dateRange = scm_datetime_formatter.format(lastBuildDate);
     dateRange = dateRange.concat(":");
     dateRange = dateRange.concat(scm_datetime_formatter.format(currentDate));
-        
+
     ArgumentListBuilder cmd = new ArgumentListBuilder();
     cmd.add(getSurroundSCMExecutable());
     cmd.add("cc");
@@ -384,46 +387,50 @@ public final class SurroundSCM extends SCM {
     }
     cmd.add("-b".concat(branch));
     cmd.add("-p".concat(repository));
-    cmd.add("-r");  
+    cmd.add("-r");
 
     listener.getLogger().println("determineChangeCount executing the command: " + cmd.toString() + " with date range: [ " + dateRange + " ]");
-		FileOutputStream os = new FileOutputStream(changelogFile);
+
+    FileOutputStream os = new FileOutputStream(changelogFile);
     try {
       BufferedOutputStream bos = new BufferedOutputStream(os);
-     
-      try {              
+
+      try {
         int cmdResult = launcher.launch().cmds(cmd).envs(new String[0]).stdin(null).stdout(bos).pwd(workspace).join();
         if (cmdResult != 0)
         {
-          listener.fatalError("Determine changes count failed with exit code " + cmdResult);                
-        }              
+          listener.fatalError("Determine changes count failed with exit code " + cmdResult);
+        }
       } finally {
-          bos.close();
+        bos.close();
       }
     } finally {
-        os.close();
-    }      
-    
+      os.close();
+    }
+
     BufferedReader br = null;
     String line = null;
-    try{      
+    try{
       br = new BufferedReader(new FileReader(changelogFile));
       line = br.readLine();
       if (line != null){
         listener.getLogger().println(line);
         String num = line.substring(6);
-         try {
-           changesCount = Double.valueOf(num.trim()).doubleValue();
-            } catch (NumberFormatException nfe) {
-               listener.fatalError("NumberFormatException: " + nfe.getMessage());
-            }
-
-        
+        try {
+          changesCount = Double.valueOf(num.trim());
+        } catch (NumberFormatException nfe) {
+          listener.fatalError("NumberFormatException: " + nfe.getMessage());
+        }
       }
-      
-    }catch (FileNotFoundException e) {
-          e.printStackTrace();
-      } 
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } finally {
+      if(br != null)
+      {
+        br.close();
+      }
+    }
     listener.getLogger().println("Number of changes determined to be: "+changesCount);
     return changesCount;
   }
